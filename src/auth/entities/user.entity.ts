@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ValidRoles } from '../enums/valid-roles.enum';
 
 @Entity('users')
@@ -22,4 +28,19 @@ export class User {
     default: [ValidRoles.user],
   })
   roles: string[];
+
+  @Column({
+    type: 'boolean',
+    default: true,
+  })
+  isActive: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @CreateDateColumn()
+  deletedAt: Date;
+
+  @ManyToOne(() => User)
+  deletedBy?: User;
 }

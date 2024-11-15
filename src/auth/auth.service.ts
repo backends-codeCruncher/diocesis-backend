@@ -52,6 +52,10 @@ export class AuthService {
       throw new UnauthorizedException('User credentials are not valid');
     }
 
+    if (!user.isActive) {
+      throw new BadRequestException('User not active');
+    }
+
     if (!bcryptAdapter.compare(password, user.password)) {
       throw new UnauthorizedException('User credentials are not valid');
     }
@@ -62,6 +66,31 @@ export class AuthService {
       user,
       token: this.getJWT({ id: user.id }),
     };
+  }
+
+  async deleteUser(admin: User, userId: string) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user || !user.isActive) {
+      throw new BadRequestException('User not found or not active');
+    }
+
+    user.isActive = false;
+    user.deletedBy = admin;
+    user.deletedAt = new Date();
+
+    try {
+      await this.userRepository.save(user);
+
+      delete user.password;
+      delete user.deletedBy.password;
+
+      return {
+        user,
+      };
+    } catch (error) {
+      this.handleDBException(error);
+    }
   }
 
   async checkAuthStatus(user: User) {

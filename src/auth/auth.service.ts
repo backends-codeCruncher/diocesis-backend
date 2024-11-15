@@ -30,6 +30,7 @@ export class AuthService {
 
       const user = this.userRepository.create({
         ...userData,
+        createdAt: new Date(),
         password: bcryptAdapter.hash(password),
       });
 

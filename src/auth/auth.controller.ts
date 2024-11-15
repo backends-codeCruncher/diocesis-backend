@@ -23,7 +23,7 @@ export class AuthController {
   }
 
   @Post('register')
-  //@Auth(ValidRoles.super, ValidRoles.admin)
+  @Auth(ValidRoles.super, ValidRoles.admin)
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }

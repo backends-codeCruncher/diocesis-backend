@@ -64,7 +64,7 @@ export class NewsService {
   async delete(newId: string) {
     const newData = await this.getNewById(newId);
     await this.newRepository.delete(newId);
-    return newData;
+    return { newData };
   }
 
   async deleteByYear(selectedYear: number) {

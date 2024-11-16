@@ -1,14 +1,13 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
-  NotFoundException,
-  UnauthorizedException,
+  UnauthorizedException
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { BaseService } from 'src/common/services/base.service';
+import { Repository } from 'typeorm';
 import { bcryptAdapter } from '../config';
 import { LoginDto, RegisterDto } from './dto';
 import { User } from './entities/user.entity';
@@ -22,6 +21,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly baseService: BaseService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -40,7 +40,7 @@ export class AuthService {
 
       return { user };
     } catch (error) {
-      this.handleDBException(error);
+      this.baseService.handleDBException(error);
     }
   }
 
@@ -69,31 +69,6 @@ export class AuthService {
     };
   }
 
-  async deleteUser(admin: User, userId: string) {
-    const user = await this.userRepository.findOneBy({ id: userId });
-
-    if (!user || !user.isActive) {
-      throw new BadRequestException('User not found or not active');
-    }
-
-    user.isActive = false;
-    user.deletedBy = admin;
-    user.deletedAt = new Date();
-
-    try {
-      await this.userRepository.save(user);
-
-      delete user.password;
-      delete user.deletedBy.password;
-
-      return {
-        user,
-      };
-    } catch (error) {
-      this.handleDBException(error);
-    }
-  }
-
   async checkAuthStatus(user: User) {
     delete user.password;
 
@@ -103,26 +78,6 @@ export class AuthService {
       user,
       token,
     };
-  }
-
-  private handleDBException(error: any) {
-    this.logger.error(error);
-
-    if (error instanceof QueryFailedError) {
-      const msg = error.message;
-      const errorCode = error.driverError.code;
-
-      switch (errorCode) {
-        case '23505':
-          throw new BadRequestException(msg);
-        default:
-          throw new InternalServerErrorException(
-            `Code: ${errorCode}, Message: ${msg}`,
-          );
-      }
-    }
-
-    throw new InternalServerErrorException('Error on AuthService');
   }
 
   private getJWT(payload: JWTPayload) {

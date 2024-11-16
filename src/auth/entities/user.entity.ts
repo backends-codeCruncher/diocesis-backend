@@ -39,8 +39,20 @@ export class User {
   createdAt: Date;
 
   @CreateDateColumn()
+  updatedAt: Date;
+
+  @CreateDateColumn()
   deletedAt: Date;
 
   @ManyToOne(() => User)
   deletedBy?: User;
+
+  @ManyToOne(() => User)
+  updatedBy?: User;
+
+  markAsDeleted(deletedBy?: User) {
+    this.deletedAt = new Date();
+    this.isActive = false;
+    if (this.deletedBy) this.deletedBy = deletedBy;
+  }
 }

@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -32,14 +33,5 @@ export class AuthController {
   @Auth()
   checkAuthStatus(@GetUser() user: User) {
     return this.authService.checkAuthStatus(user);
-  }
-
-  @Delete(':userId')
-  @Auth(ValidRoles.super, ValidRoles.admin)
-  deleteUser(
-    @GetUser() admin: User,
-    @Param('userId', ParseUUIDPipe) userId: string,
-  ) {
-    return this.authService.deleteUser(admin, userId);
   }
 }

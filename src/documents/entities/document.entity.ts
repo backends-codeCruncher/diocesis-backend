@@ -22,7 +22,7 @@ export class Document {
   @Column({
     type: 'enum',
     enum: DocumentEnum,
-    default: '',
+    nullable: true,
   })
   type: DocumentEnum;
 

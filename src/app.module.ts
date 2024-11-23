@@ -6,8 +6,9 @@ import { UsersModule } from './users/users.module';
 import { NewsModule } from './news/news.module';
 import { ArticulesModule } from './articules/articules.module';
 import { DocumentsModule } from './documents/documents.module';
+import { PriestsModule } from './priests/priests.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, UsersModule, CommonModule, NewsModule, ArticulesModule, DocumentsModule],
+  imports: [DatabaseModule, AuthModule, UsersModule, CommonModule, NewsModule, ArticulesModule, DocumentsModule, PriestsModule],
 })
 export class AppModule {}

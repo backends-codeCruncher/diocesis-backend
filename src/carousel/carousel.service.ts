@@ -21,9 +21,12 @@ export class CarouselService {
     createCarouselItemDto: CreateCarouselItemDto,
     file: Express.Multer.File,
   ) {
+    createCarouselItemDto.isImage = false;
+
     if (file) {
       const result = await this.cloudinaryService.uploadImage('carousel', file);
       createCarouselItemDto.url = result.secure_url;
+      createCarouselItemDto.isImage = true;
     }
 
     try {

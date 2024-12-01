@@ -7,8 +7,6 @@ export class CreateCarouselItemDto {
   @IsOptional()
   url: string;
 
-  @IsBoolean()
-  @Type(() => Boolean)
   isImage: boolean;
 
   image: Express.Multer.File;

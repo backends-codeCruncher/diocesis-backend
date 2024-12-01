@@ -3,13 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '../auth/entities/user.entity';
-import { CreatePriestDto, UpdatePriestDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Priest } from './entities/priest.entity';
 import { ILike, Repository } from 'typeorm';
-import { BaseService } from '../common/services/base.service';
+import { User } from '../auth/entities/user.entity';
 import { PaginationDto } from '../common/dto';
+import { BaseService } from '../common/services/base.service';
+import { CloudinaryService } from '../common/services/cloudinary.service';
+import { CreatePriestDto, UpdatePriestDto } from './dto';
+import { Priest } from './entities/priest.entity';
 
 @Injectable()
 export class PriestsService {
@@ -17,6 +18,7 @@ export class PriestsService {
     @InjectRepository(Priest)
     private readonly priestRepository: Repository<Priest>,
     private readonly baseService: BaseService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   // Crear sacerdote
@@ -26,7 +28,10 @@ export class PriestsService {
     file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('Image file is required');
-    createPriestDto.picture = file.buffer.toString('base64');
+    const picture = await this.cloudinaryService.uploadImage('Padres', file);
+
+    createPriestDto.picture = picture.secure_url;
+
     try {
       const priest = this.priestRepository.create({
         ...createPriestDto,

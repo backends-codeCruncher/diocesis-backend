@@ -5,11 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dto';
-import { Between, ILike, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { User } from '../auth/entities/user.entity';
 import { BaseService } from '../common/services/base.service';
 import { CreateNewDto, UpdateNewDto } from './dto';
 import { New } from './entities/new.entity';
+import { CloudinaryService } from '../common/services/cloudinary.service';
 
 @Injectable()
 export class NewsService {
@@ -17,6 +18,7 @@ export class NewsService {
     @InjectRepository(New)
     private readonly newRepository: Repository<New>,
     private readonly baseService: BaseService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(
@@ -25,8 +27,9 @@ export class NewsService {
     file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('Image file is required');
+    const picture = await this.cloudinaryService.uploadImage('Noticias', file);
 
-    createNewDto.picture = file.buffer.toString('base64');
+    createNewDto.picture = picture.secure_url;
 
     try {
       const news = this.newRepository.create({

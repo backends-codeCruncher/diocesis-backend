@@ -7,8 +7,19 @@ import { NewsModule } from './news/news.module';
 import { ArticulesModule } from './articules/articules.module';
 import { DocumentsModule } from './documents/documents.module';
 import { PriestsModule } from './priests/priests.module';
+import { CarouselModule } from './carousel/carousel.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, UsersModule, CommonModule, NewsModule, ArticulesModule, DocumentsModule, PriestsModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    UsersModule,
+    CommonModule,
+    NewsModule,
+    ArticulesModule,
+    DocumentsModule,
+    PriestsModule,
+    CarouselModule,
+  ],
 })
 export class AppModule {}

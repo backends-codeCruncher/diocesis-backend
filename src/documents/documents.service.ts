@@ -1,14 +1,15 @@
-import { Document } from './entities/document.entity';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BaseService } from '../common/services/base.service';
 import { Repository } from 'typeorm';
 import { User } from '../auth/entities/user.entity';
+import { BaseService } from '../common/services/base.service';
+import { CloudinaryService } from '../common/services/cloudinary.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './dto';
+import { Document } from './entities/document.entity';
 import { GetDocumentsParams } from './interfaces/get-documents-params.interface';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class DocumentsService {
     @InjectRepository(Document)
     private readonly documentRepository: Repository<Document>,
     private readonly baseService: BaseService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async createDocument(
@@ -25,7 +27,13 @@ export class DocumentsService {
     file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('Document file is required');
-    createDocumentDto.document = file.buffer.toString('base64');
+
+    const document = await this.cloudinaryService.uploadFile(
+      'Documentos',
+      file,
+    );
+
+    createDocumentDto.document = document.secure_url;
 
     try {
       const document = this.documentRepository.create({

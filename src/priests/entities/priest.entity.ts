@@ -17,7 +17,7 @@ export class Priest {
   @Column('text')
   lastName: string;
 
-  @Column('datetime')
+  @Column('date')
   birthDate: Date;
 
   @Column('text')

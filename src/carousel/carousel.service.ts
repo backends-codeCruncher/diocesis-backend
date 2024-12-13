@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseService } from '../common/services/base.service';
@@ -16,31 +20,32 @@ export class CarouselService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async createItem(
+  async createImageItem(
     admin: User,
     createCarouselItemDto: CreateCarouselItemDto,
     file: Express.Multer.File,
   ) {
+    if (!file) throw new BadRequestException('Image file is required');
+
+    const result = await this.cloudinaryService.uploadImage('carousel', file);
+    createCarouselItemDto.url = result.secure_url;
+    createCarouselItemDto.isImage = true;
+
+    return this.createItem(admin, createCarouselItemDto);
+  }
+
+  async createVideoItem(
+    admin: User,
+    createCarouselItemDto: CreateCarouselItemDto,
+    file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Video file is required');
+
+    const result = await this.cloudinaryService.uploadFile('carousel', file);
+    createCarouselItemDto.url = result.secure_url;
     createCarouselItemDto.isImage = false;
 
-    if (file) {
-      const result = await this.cloudinaryService.uploadImage('carousel', file);
-      createCarouselItemDto.url = result.secure_url;
-      createCarouselItemDto.isImage = true;
-    }
-
-    try {
-      const item = this.carouselItemRepository.create({
-        ...createCarouselItemDto,
-        createdAt: new Date(),
-        createdBy: admin,
-      });
-
-      await this.carouselItemRepository.save(item);
-      return { item };
-    } catch (error) {
-      this.baseService.handleDBException(error);
-    }
+    return this.createItem(admin, createCarouselItemDto);
   }
 
   async getCarouselItems() {
@@ -67,5 +72,23 @@ export class CarouselService {
 
     await this.carouselItemRepository.delete(itemId);
     return { item };
+  }
+
+  private async createItem(
+    admin: User,
+    createCarouselItemDto: CreateCarouselItemDto,
+  ) {
+    try {
+      const item = this.carouselItemRepository.create({
+        ...createCarouselItemDto,
+        createdAt: new Date(),
+        createdBy: admin,
+      });
+
+      await this.carouselItemRepository.save(item);
+      return { item };
+    } catch (error) {
+      this.baseService.handleDBException(error);
+    }
   }
 }

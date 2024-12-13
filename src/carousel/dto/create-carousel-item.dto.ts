@@ -10,4 +10,5 @@ export class CreateCarouselItemDto {
   isImage: boolean;
 
   image: Express.Multer.File;
+  video: Express.Multer.File;
 }

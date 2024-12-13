@@ -14,7 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Auth, GetUser } from '../auth/decorators';
 import { User } from '../auth/entities/user.entity';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
-import { fileFilter } from '../config/helpers';
+import { fileFilter, videoFilter } from '../config/helpers';
 import { CarouselService } from './carousel.service';
 import { CreateCarouselItemDto } from './dto/create-carousel-item.dto';
 
@@ -22,19 +22,42 @@ import { CreateCarouselItemDto } from './dto/create-carousel-item.dto';
 export class CarouselController {
   constructor(private readonly carouselService: CarouselService) {}
 
-  @Post()
+  @Post('image')
   @Auth(ValidRoles.super, ValidRoles.admin)
   @UseInterceptors(
     FileInterceptor('image', {
       fileFilter: fileFilter,
     }),
   )
-  createItem(
+  createItemImage(
     @GetUser() admin: User,
     @Body() createCarouselItemDto: CreateCarouselItemDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.carouselService.createItem(admin, createCarouselItemDto, file);
+    return this.carouselService.createImageItem(
+      admin,
+      createCarouselItemDto,
+      file,
+    );
+  }
+
+  @Post('video')
+  @Auth(ValidRoles.super, ValidRoles.admin)
+  @UseInterceptors(
+    FileInterceptor('video', {
+      fileFilter: videoFilter,
+    }),
+  )
+  createItemVideo(
+    @GetUser() admin: User,
+    @Body() createCarouselItemDto: CreateCarouselItemDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.carouselService.createVideoItem(
+      admin,
+      createCarouselItemDto,
+      file,
+    );
   }
 
   @Get()
